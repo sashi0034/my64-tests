@@ -7,4 +7,7 @@
 
 # Build
 
-`npx libdragon make`
+```
+cd test_1
+npx libdragon make
+```
