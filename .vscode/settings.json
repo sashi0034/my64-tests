@@ -2,5 +2,7 @@
     "files.associations": {
         "libdragon.h": "c",
         "n64types.h": "c"
-    }
+    },
+    "emptyIndent.removeIndent": true,
+    "emptyIndent.highlightIndent": true,
 }

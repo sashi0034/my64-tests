@@ -8,10 +8,29 @@
 
 DEFINE_RSP_UCODE(rsp_process);
 
-static volatile bool broke = false;
+static volatile bool s_broke = false;
 
-static void sp_handler() {
-    broke = true;
+static void sp_handler()
+{
+    s_broke = true;
+}
+
+static int s_data_buffer[4];
+
+void print_bytes16(unsigned char *origin)
+{
+    unsigned long i = 0;
+    printf("000: ");
+    while (i < 16)
+    {
+        printf("%02X ", origin[i]);
+        if (i == 7)
+        {
+            printf("\n008: ");
+        }
+        i++;
+    }
+    printf("\n");
 }
 
 int main(void)
@@ -27,44 +46,39 @@ int main(void)
 
     rsp_load(&rsp_process);
 
-    unsigned char* orig = malloc(16);
-    rsp_read_data(orig, 16, 0);
+    unsigned char *origin = malloc(16);
+    rsp_read_data(origin, 16, 0);
 
-    unsigned long i = 0;
-    while(i < 16)
-    {
-        printf("%02X ", orig[i]);
-        if (i % 8 == 7) {
-            printf("\n");
-        }
-        i++;
-    }
-
-    printf("\n");
+    print_bytes16(origin);
     console_render();
 
-    rsp_run_async();
+    // Set data from CPU to RSP
+    s_data_buffer[0] = 0x01010101;
+    s_data_buffer[1] = 0x10101010;
+    s_data_buffer[2] = 0x21212121;
 
-    RSP_WAIT_LOOP(2000) {
-        if (broke) {
+    rsp_load_data(s_data_buffer, sizeof(s_data_buffer), 0); // Write data to DMEM
+    rsp_read_data(origin, 16, 0);                           // Read DMEM
+
+    printf("Loaded!\n");
+    print_bytes16(origin);
+    console_render();
+
+    // Process RSP
+    rsp_run_async();
+    RSP_WAIT_LOOP(2000)
+    {
+        if (s_broke)
+        {
             break;
         }
     }
 
-    printf("\nbroke!");
-    printf("\n");
+    printf("Calculated!\n");
 
-    unsigned char* up = malloc(16);
-    rsp_read_data((void*)up, 16, 0);
+    unsigned char *up = malloc(16);
+    rsp_read_data((void *)up, 16, 0);
 
-    i = 0;
-    while(i < 16)
-    {
-        printf("%02X ", up[i]);
-        if (i % 8 == 7) {
-            printf("\n");
-        }
-        i++;
-    }
+    print_bytes16(up);
     console_render();
 }
