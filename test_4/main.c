@@ -7,11 +7,14 @@
 #include <stdint.h>
 #include <libdragon.h>
 
-static volatile uint32_t animcounter = 0;
+static uint32_t frame_counter = 0;
+static volatile uint32_t timer_counter = 0;
+
+static char s_sb_256[256];
 
 void update_counter(int ovfl)
 {
-    animcounter++;
+    timer_counter++;
 }
 
 int main(void)
@@ -72,10 +75,10 @@ int main(void)
             graphics_draw_sprite_trans(disp, 50, 50, mudkip);
 
             /* Display walking NESS animation */
-            graphics_draw_sprite_stride(disp, 20, 100, earthbound, ((animcounter / 15) & 1) ? 1 : 0);
+            graphics_draw_sprite_stride(disp, 20, 100, earthbound, ((timer_counter / 15) & 1) ? 1 : 0);
 
             /* Display rotating NESS animation */
-            graphics_draw_sprite_stride(disp, 50, 100, earthbound, ((animcounter / 8) & 0x7) * 2);
+            graphics_draw_sprite_stride(disp, 50, 100, earthbound, ((timer_counter / 8) & 0x7) * 2);
 
             break;
         case 1:
@@ -122,7 +125,7 @@ int main(void)
             rdp_sync(SYNC_PIPE);
 
             /* Load the sprite into texture slot 0, at the beginning of memory, without mirroring */
-            rdp_load_texture_stride(0, 0, MIRROR_DISABLED, earthbound, ((animcounter / 15) & 1) ? 1 : 0);
+            rdp_load_texture_stride(0, 0, MIRROR_DISABLED, earthbound, ((timer_counter / 15) & 1) ? 1 : 0);
 
             /* Display walking NESS animation */
             rdp_draw_sprite(0, 20, 100, MIRROR_DISABLED);
@@ -131,7 +134,7 @@ int main(void)
             rdp_sync(SYNC_PIPE);
 
             /* Load the sprite into texture slot 0, at the beginning of memory, without mirroring */
-            rdp_load_texture_stride(0, 0, MIRROR_DISABLED, earthbound, ((animcounter / 8) & 0x7) * 2);
+            rdp_load_texture_stride(0, 0, MIRROR_DISABLED, earthbound, ((timer_counter / 8) & 0x7) * 2);
 
             /* Display rotating NESS animation */
             rdp_draw_sprite(0, 50, 100, MIRROR_DISABLED);
@@ -142,6 +145,13 @@ int main(void)
             break;
         }
         }
+
+        frame_counter++;
+        snprintf(s_sb_256, sizeof(s_sb_256), "Frame: %ld, Timer: %ld\nNESS W: %d, H: %d, HS: %d, vs: %d\n\tleft: %u, right: %lu",
+                 frame_counter, timer_counter,
+                 earthbound->width, earthbound->height, earthbound->hslices, earthbound->vslices,
+                 ((timer_counter / 15) & 1) ? 1 : 0, ((timer_counter / 8) & 0x7) * 2);
+        graphics_draw_text(disp, 20, 150, s_sb_256);
 
         /* Force backbuffer flip */
         display_show(disp);
