@@ -5,7 +5,7 @@
 #define CY_14 14
 
 static display_context_t s_display = NULL;
-static char s_sb_64[64];
+static char s_sb_128[64];
 
 int main(void)
 {
@@ -22,8 +22,8 @@ int main(void)
         graphics_set_color(0xFFFF00FF, 0);
         graphics_draw_text(s_display, TEXT_POS(LX_8, CY_14 - 2), "Hello N64!\n");
 
-        snprintf(s_sb_64, sizeof(s_sb_64), "Count: %2d\n", count);
-        graphics_draw_text(s_display, TEXT_POS(LX_8, CY_14 + 2), s_sb_64);
+        snprintf(s_sb_128, sizeof(s_sb_128), "Count: %2d\n", count);
+        graphics_draw_text(s_display, TEXT_POS(LX_8, CY_14 + 2), s_sb_128);
         display_show(s_display);
 
         count++;
