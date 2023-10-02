@@ -7,6 +7,22 @@
 
 // static char s_sb_128[128];
 
+struct CmdParam
+{
+    char name[8];
+};
+
+const struct CmdParam k_paramEc[] = {
+    {"lft"},
+    {"YL"},
+    {"YM"},
+    {"YH"},
+    {"XL"},
+    {"XLf"},
+    {"XLf"}};
+
+const int k_paramEcCount = sizeof(k_paramEc) / sizeof(k_paramEc[0]);
+
 int main(void)
 {
     display_init(RESOLUTION_320x240, DEPTH_32_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE);
@@ -22,12 +38,12 @@ int main(void)
 
         graphics_fill_screen(disp, 0xECECECFF);
         graphics_set_color(0x1A1D21FF, 0);
-
-        graphics_draw_text(disp, TEXT_POS(CX_4, 1), "Edge coefficients");
-        graphics_draw_text(disp, TEXT_POS(CX_4, 2), "lft");
-        graphics_draw_text(disp, TEXT_POS(CX_4, 3), "YL");
-        graphics_draw_text(disp, TEXT_POS(CX_4, 4), "YM");
-        graphics_draw_text(disp, TEXT_POS(CX_4, 5), "YH");
+        graphics_draw_text(disp, TEXT_POS(CX_2, 1), "Edge coefficients");
+        const int paramStartY = 2;
+        for (int y = 0; y < k_paramEcCount; ++y)
+        {
+            graphics_draw_text(disp, TEXT_POS(CX_2, paramStartY + y), k_paramEc[y].name);
+        }
 
         controller_scan();
         struct controller_data keys = get_keys_down();
@@ -37,11 +53,11 @@ int main(void)
         if (keys.c[0].up)
             cursor--;
         if (cursor < 0)
-            cursor = 4;
-        if (cursor > 4)
+            cursor = k_paramEcCount - 1;
+        if (cursor > k_paramEcCount - 1)
             cursor = 0;
 
-        graphics_draw_text(disp, TEXT_POS(CX_1, 1 + cursor), "->");
+        graphics_draw_text(disp, TEXT_POS(CX_1, paramStartY + cursor), ">");
 
         display_show(disp);
     }
