@@ -1,7 +1,15 @@
 {
     "files.associations": {
+        "*.vt": "verilog",
+        "*.unity": "yaml",
+        "*.v": "verilog",
+        "*.miniml": "plaintext",
+        "*.dasc": "c",
         "libdragon.h": "c",
-        "n64types.h": "c"
+        "n64types.h": "c",
+        "rdpq_text.h": "c",
+        "rdpq_sprite.h": "c",
+        "rdpq_tri.h": "c"
     },
     "emptyIndent.removeIndent": true,
     "emptyIndent.highlightIndent": true,
