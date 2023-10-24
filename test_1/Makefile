@@ -1,19 +1,40 @@
-V=1
-SOURCE_DIR=.
-BUILD_DIR=../build/test_1
-include $(N64_INST)/include/n64.mk
+V = 1
+# BUILD_DIRの中に..を書くくらいならMakefileをトップに持ってくる方がよいと思う
+BUILD_DIR = ../build/test_1
+include $(N64_INST)/include/n64.mk # ???
 
-all: test_1.z64
+TARGET := test_1.z64
+N64_ROM_TITLE := "my64-tests test_1"
+
+DEPS_FLAGS = -MMD -MP
+CFLAGS := -Wall -Wextra $(DEPS_FLAGS)
+CXXFLAGS := -Wall -Wextra $(DEPS_FLAGS)
+LDFLAGS := -ldragon
+
+ELF := $(TARGET:%.z64=$(BUILD_DIR)/%.elf)
+SRCS := $(wildcard *.c)
+OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:%.o=%.d)
+
 .PHONY: all
+all: $(TARGET)
 
-OBJS = $(BUILD_DIR)/main.o
+$(TARGET): $(ELF)
+	some-command-to-make-z64-from-elf $< -o $@
 
-test_1.z64: N64_ROM_TITLE="my64-tests test_1"
+$(ELF): $(OBJS)
+	$(CC) $(LDFLAGS) $^ -o $@
 
-$(BUILD_DIR)/test_1.elf: $(OBJS)
+$(OBJS): $(BUILD_DIR)/%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-clean:
-	rm -f $(BUILD_DIR)/* *.z64
+$(DEPS): %.d: %.o
+-include $(DEPS)
+
+$(OBJS) $(DEPS) $(ELF): | $(BUILD_DIR)
+$(BUILD_DIR):
+	mkdir -p $@
+
 .PHONY: clean
-
--include $(wildcard $(BUILD_DIR)/*.d)
+clean:
+	$(RM) $(OBJS) $(DEPS) $(TARGET)
